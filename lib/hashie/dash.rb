@@ -79,10 +79,12 @@ module Hashie
       end
 
       attributes.each_pair do |att, value|
-        if property_exists?(att)
+        begin
           self.send("#{att}=", value)
-        else
-          puts "Property #{att} not defined for #{self.inspect}"
+        rescue NoMethodError => e
+          puts "=" * 20
+          puts "lib/hashie/dash.rb:83: Warning: property '#{att}' not defined for #{self.class}'."
+          puts "=" * 20
         end
       end
     end
@@ -103,7 +105,10 @@ module Hashie
       # Raises an NoMethodError if the property doesn't exist
       #
       def property_exists?(property)
-        self.class.property?(property.to_sym)
+        unless self.class.property?(property.to_sym)
+          raise NoMethodError, "The property '#{property}' is not defined for this Dash."
+        end
+        true
       end
   end
 end
